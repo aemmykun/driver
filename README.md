@@ -1,90 +1,85 @@
-# driver
+# Driver Ledger AU
 
-Production-grade Riverpod ledger sync module for driver earnings.
+Local-first Flutter MVP for Australian rideshare drivers to record income,
+expenses, receipts and GST evidence.
 
-## Module overview
+## Product boundary
 
-```
-lib/
-├── ledger.dart                  ← public barrel export
-└── src/ledger/
-    ├── ledger_models.dart       ← DTOs (LocalEntry, CommittedEntry, LedgerState)
-    ├── ledger_models.freezed.dart
-    ├── ledger_models.g.dart
-    ├── ledger_client.dart       ← secureLedgerClientProvider + TenantIsolationInterceptor
-    └── ledger_sync.dart         ← LedgerNotifier + Riverpod providers
-```
+The app:
 
-## State machine
+- records manual income and expenses using integer cents
+- captures receipt images into the application documents directory
+- imports Uber and DiDi-style CSV statements
+- deduplicates imported rows by provider reference or canonical row hash
+- calculates a reviewable quarterly GST/BAS draft (`G1`, `1A`, `1B`)
+- records business-use percentages and missing-evidence blockers
+- exports a JSON evidence pack with a SHA-256 payload hash
+- fails closed on ATO transmission until SBR/DSP conformance and credentials
 
-```
-Pending ──► Syncing ──► Committed ──► Locked
-               │
-               └──(transient error)──► Pending
-```
+The app does **not**:
 
-| Status      | Meaning                                                      |
-|-------------|--------------------------------------------------------------|
-| `pending`   | Created on-device, not yet submitted to the server           |
-| `syncing`   | HTTP request dispatched, awaiting server response            |
-| `committed` | Server accepted the entry and returned a `CommittedEntry`    |
-| `locked`    | End-of-period finalisation; entry is immutable               |
+- decide that an expense is legally deductible
+- verify ABN or GST registration with the ATO
+- provide personalised tax or BAS advice
+- transmit a BAS to the ATO in this MVP
+- claim that an Uber or DiDi connection is active without provider approval
 
-## Quick start
+## Run locally
 
-### 1. Override `ledgerClientConfigProvider`
-
-```dart
-runApp(
-  ProviderScope(
-    overrides: [
-      ledgerClientConfigProvider.overrideWithValue(
-        LedgerClientConfig(
-          baseUrl: 'https://api.example.com/v1',
-          tenantId: currentTenantId,
-          tokenProvider: () => authService.currentToken,
-          onTenantMismatch: () => authService.signOut(),
-        ),
-      ),
-    ],
-    child: const MyApp(),
-  ),
-);
+```bash
+flutter --version
+bash tool/bootstrap_platforms.sh
+flutter pub get
+flutter analyze
+flutter test
+flutter run
 ```
 
-### 2. Stage a new entry
+The bootstrap command creates standard Android and iOS runner projects with
+the bundle namespace `org.tenantsage.driver`. Run it once and commit the
+generated runner projects when preparing a signed store release.
 
-```dart
-ref.read(ledgerProvider.notifier).addPendingEntry(
-  tenantId: 'tenant-abc',
-  receiptId: 'receipt-123',
-  platform: 'UBER',
-  grossAmount: 42.50,
-  currency: 'USD',
-);
+## Architecture
+
+```text
+Flutter UI
+  -> Riverpod controllers
+    -> SQLite local ledger
+      -> tax/evidence engine
+        -> review + declaration + evidence export
+          -X-> ATO transmission (blocked without accreditation)
+
+CSV files -> deterministic parser -> unique source reference -> SQLite
+Uber API  -> adapter boundary (limited access; backend OAuth required)
+DiDi API  -> unavailable boundary -> CSV fallback
 ```
 
-### 3. Sync pending entries
+## Deployment status
 
-```dart
-await ref.read(ledgerProvider.notifier).syncPendingEntries();
-```
+The repository includes:
 
-### 4. Watch derived state
+- Flutter analysis and unit-test CI
+- Android debug compilation
+- iOS no-codesign compilation
+- a manually triggered Android release-candidate AAB artifact
 
-```dart
-final pending   = ref.watch(pendingEntriesProvider);
-final active    = ref.watch(activeCommittedEntriesProvider);
-final locked    = ref.watch(lockedEntriesProvider);
-final isSyncing = ref.watch(isSyncingProvider);
-```
+Publishing still requires operator-owned credentials:
 
-## Dependencies
+- Google Play application and production signing key
+- Apple Developer team, App Store Connect application and distribution signing
+- final privacy-policy URL, support URL, screenshots and store declarations
+- Uber Drivers API approval and a backend OAuth/token service for direct sync
+- SBR/DSP onboarding, conformance and production credentials for ATO transmission
 
-| Package              | Role                             |
-|----------------------|----------------------------------|
-| `flutter_riverpod`   | State management                 |
-| `freezed_annotation` | Immutable data classes           |
-| `json_annotation`    | JSON serialisation               |
-| `dio`                | HTTP transport + interceptors    |
-| `uuid`               | Local entry ID generation        |
+See [Deployment](docs/DEPLOYMENT.md), [Tax boundary](docs/TAX_BOUNDARY.md),
+[CSV format](docs/CSV_FORMAT.md) and [Privacy](PRIVACY.md).
+
+## Authoritative references
+
+- [ATO ride-sourcing](https://www.ato.gov.au/businesses-and-organisations/income-deductions-and-concessions/sharing-economy-and-tax/ride-sourcing)
+- [ATO income and deductions for ride-sourcing](https://www.ato.gov.au/businesses-and-organisations/income-deductions-and-concessions/sharing-economy-and-tax/ride-sourcing/income-and-deductions-for-ride-sourcing)
+- [ATO record keeping](https://www.ato.gov.au/businesses-and-organisations/income-deductions-and-concessions/sharing-economy-and-tax/ride-sourcing/record-keeping)
+- [TPB guidance for digital service providers](https://www.tpb.gov.au/tpb-gs-14-2011-digital-service-providers-and-tax-agent-services-act-2009)
+- [Uber Drivers API](https://developer.uber.com/docs/drivers/introduction)
+
+Rules and rates must be reviewed before every production tax-rule release.
