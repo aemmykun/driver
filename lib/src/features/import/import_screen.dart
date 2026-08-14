@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -80,13 +79,12 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['csv'],
-      withData: true,
     );
     if (files.isEmpty) return;
     setState(() => _busy = true);
     try {
       final file = files.single;
-      final bytes = file.bytes ?? await File(file.path!).readAsBytes();
+      final bytes = await file.readAsBytes();
       final raw = utf8.decode(bytes, allowMalformed: false);
       final entries = const CsvImportService().parse(raw, source: _source);
       await ref.read(ledgerControllerProvider.notifier).saveAll(entries);
