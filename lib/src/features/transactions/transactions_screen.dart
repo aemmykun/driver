@@ -145,7 +145,7 @@ class _EntryFormState extends ConsumerState<_EntryForm> {
             if (_kind == EntryKind.expense) ...[
               const SizedBox(height: 12),
               DropdownButtonFormField<ExpenseCategory>(
-                value: _category,
+                initialValue: _category,
                 decoration: const InputDecoration(labelText: 'Expense category'),
                 items: ExpenseCategory.values
                     .map((value) => DropdownMenuItem(value: value, child: Text(value.name)))

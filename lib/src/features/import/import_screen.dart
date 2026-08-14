@@ -38,7 +38,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
             padding: const EdgeInsets.all(16),
             child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               DropdownButtonFormField<EntrySource>(
-                value: _source,
+                initialValue: _source,
                 decoration: const InputDecoration(labelText: 'Statement provider'),
                 items: const [
                   DropdownMenuItem(value: EntrySource.uberCsv, child: Text('Uber CSV')), 

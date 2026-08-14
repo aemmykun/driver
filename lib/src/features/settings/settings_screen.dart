@@ -72,7 +72,7 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
           onChanged: (value) => setState(() => _gstRegistered = value),
         ),
         DropdownButtonFormField<String>(
-          value: _basis,
+          initialValue: _basis,
           decoration: const InputDecoration(labelText: 'GST accounting basis'),
           items: const [
             DropdownMenuItem(value: 'cash', child: Text('Cash basis')),
@@ -90,9 +90,10 @@ class _ProfileFormState extends ConsumerState<_ProfileForm> {
               displayName: _name.text.trim(),
             );
             await ref.read(profileProvider.notifier).save(profile);
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profile saved locally.')));
-            }
+            if (!context.mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Profile saved locally.')),
+            );
           },
           child: const Text('Save profile'),
         ),

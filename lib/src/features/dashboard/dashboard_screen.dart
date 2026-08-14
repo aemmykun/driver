@@ -52,7 +52,7 @@ class DashboardScreen extends ConsumerWidget {
                     const SizedBox(height: 12),
                     _Check(ok: entries.isNotEmpty, text: 'At least one ledger entry recorded'),
                     _Check(ok: missing == 0, text: 'Expense evidence complete'),
-                    _Check(ok: false, text: 'ATO transmission accreditation configured'),
+                    const _Check(ok: false, text: 'ATO transmission accreditation configured'),
                   ],
                 ),
               ),
