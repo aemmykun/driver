@@ -60,7 +60,7 @@ The repository includes:
 
 - Flutter analysis and unit-test CI
 - Android debug compilation
-- iOS no-codesign compilation
+- iOS simulator compilation without distribution signing
 - a manually triggered Android release-candidate AAB artifact
 
 Publishing still requires operator-owned credentials:

@@ -77,15 +77,15 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   }
 
   Future<void> _pickAndImport() async {
-    final result = await FilePicker.platform.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['csv'],
       withData: true,
     );
-    if (result == null) return;
+    if (files.isEmpty) return;
     setState(() => _busy = true);
     try {
-      final file = result.files.single;
+      final file = files.single;
       final bytes = file.bytes ?? await File(file.path!).readAsBytes();
       final raw = utf8.decode(bytes, allowMalformed: false);
       final entries = const CsvImportService().parse(raw, source: _source);

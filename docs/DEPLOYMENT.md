@@ -8,10 +8,10 @@ flutter pub get
 flutter analyze
 flutter test
 flutter build apk --debug
-flutter build ios --debug --no-codesign
+flutter build ios --simulator --debug
 ```
 
-CI performs the same analysis, tests and unsigned/no-store-signing compilation.
+CI performs the same analysis, tests and Android/iOS simulator compilation.
 
 ## 2. Android production release
 

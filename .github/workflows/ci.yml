@@ -35,4 +35,4 @@ jobs:
       - name: Generate platform projects
         run: bash tool/bootstrap_platforms.sh
       - run: flutter pub get
-      - run: flutter build ios --debug --no-codesign
+      - run: flutter build ios --simulator --debug
