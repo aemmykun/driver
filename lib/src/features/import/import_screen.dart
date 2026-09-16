@@ -76,10 +76,16 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   }
 
   Future<void> _pickAndImport() async {
-    final files = await FilePicker.pickFiles(
+    final Object? selection = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['csv'],
     );
+    if (selection == null) return;
+    final files = switch (selection) {
+      List<PlatformFile> files => files,
+      FilePickerResult result => result.files,
+      _ => const <PlatformFile>[],
+    };
     if (files.isEmpty) return;
     setState(() => _busy = true);
     try {
