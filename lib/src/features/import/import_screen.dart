@@ -93,7 +93,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Import could not continue because the file picker returned an unexpected result. Please try again.')),
+          const SnackBar(content: Text('Import failed because the file picker returned an unexpected response. Please report this issue.')),
         );
       }
       return;
