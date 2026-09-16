@@ -87,7 +87,16 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
     } else if (selection case FilePickerResult result) {
       files = result.files;
     } else {
-      throw StateError('Unsupported file picker result: ${selection.runtimeType}');
+      assert(
+        false,
+        'Unsupported file picker result: ${selection.runtimeType}',
+      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Import blocked: unsupported file picker result.')),
+        );
+      }
+      return;
     }
     if (files.isEmpty) return;
     setState(() => _busy = true);
