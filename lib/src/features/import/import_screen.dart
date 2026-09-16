@@ -93,7 +93,7 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       );
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Import blocked: unsupported file picker result.')),
+          const SnackBar(content: Text('Import could not continue. Please try again and select a CSV file.')),
         );
       }
       return;
