@@ -81,11 +81,14 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
       allowedExtensions: const ['csv'],
     );
     if (selection == null) return;
-    final files = switch (selection) {
-      List<PlatformFile> files => files,
-      FilePickerResult result => result.files,
-      _ => const <PlatformFile>[],
-    };
+    final List<PlatformFile> files;
+    if (selection case List<PlatformFile> pickedFiles) {
+      files = pickedFiles;
+    } else if (selection case FilePickerResult result) {
+      files = result.files;
+    } else {
+      throw StateError('Unsupported file picker result: ${selection.runtimeType}');
+    }
     if (files.isEmpty) return;
     setState(() => _busy = true);
     try {
