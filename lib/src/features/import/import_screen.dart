@@ -76,28 +76,10 @@ class _ImportScreenState extends ConsumerState<ImportScreen> {
   }
 
   Future<void> _pickAndImport() async {
-    final Object? selection = await FilePicker.pickFiles(
+    final files = await FilePicker.pickFiles(
       type: FileType.custom,
       allowedExtensions: const ['csv'],
     );
-    if (selection == null) return;
-    final List<PlatformFile> files;
-    if (selection case List<PlatformFile> pickedFiles) {
-      files = pickedFiles;
-    } else if (selection case FilePickerResult result) {
-      files = result.files;
-    } else {
-      assert(
-        false,
-        'Unsupported file picker result: ${selection.runtimeType}',
-      );
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Import failed because the file picker returned an unexpected response. Please report this issue.')),
-        );
-      }
-      return;
-    }
     if (files.isEmpty) return;
     setState(() => _busy = true);
     try {
